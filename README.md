@@ -1,0 +1,1 @@
+Pilot project for setting up CMake projects
