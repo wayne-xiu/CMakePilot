@@ -1,17 +1,21 @@
 #pragma once
 
-#define _MR_DLL_
-
-#ifdef _MR_DLL_
-#define MRCPP_API __declspec(dllexport)
+#ifdef MR_WITH_EXPORTS
+	#ifdef MR_EXPORTS
+	#define MRCPP_API __declspec(dllexport)
+	#else
+	#define MRCPP_API __declspec(dllimport)
+	#endif
 #else
-#define MRCPP_API __declspec(dllimport)
+	#define MRCPP_API
 #endif
 
 #include <Eigen/Dense>
 #include <vector>
 
-namespace mr {
+#ifndef MR_SKIP_NAMESPACE
+namespace MR {
+#endif
 
 /*
  * Function: Find if the value is negligible enough to consider 0
@@ -690,4 +694,6 @@ std::vector<Eigen::MatrixXd> MRCPP_API SimulateControl(const Eigen::VectorXd&, c
 	const Eigen::VectorXd&, const std::vector<Eigen::MatrixXd>&, const std::vector<Eigen::MatrixXd>&,
 	double, double, double, double, int);
 
+#ifndef MR_SKIP_NAMESPACE
 }
+#endif

@@ -12,7 +12,9 @@
 
 # define M_PI           3.14159265358979323846  /* pi */
 
-namespace mr {
+#ifndef MR_SKIP_NAMESPACE
+namespace MR {
+#endif
 
 	/* Function: Find if the value is negligible enough to consider 0
 	 * Inputs: value to be checked as a double
@@ -251,7 +253,7 @@ namespace mr {
 
 	Eigen::MatrixXd MatrixLog6(const Eigen::MatrixXd& T) {
 		Eigen::MatrixXd m_ret(4, 4);
-		auto rp = mr::TransToRp(T);
+		auto rp = MR::TransToRp(T);
 		Eigen::Matrix3d omgmat = MatrixLog3(rp.at(0));
 		Eigen::Matrix3d zeros3d = Eigen::Matrix3d::Zero(3, 3);
 		if (NearZero(omgmat.norm())) {
@@ -343,7 +345,7 @@ namespace mr {
 	}
 
 	Eigen::MatrixXd TransInv(const Eigen::MatrixXd& transform) {
-		auto rp = mr::TransToRp(transform);
+		auto rp = MR::TransToRp(transform);
 		auto Rt = rp.at(0).transpose();
 		auto t = -(Rt * rp.at(1));
 		Eigen::MatrixXd inv(4, 4);
@@ -507,7 +509,7 @@ namespace mr {
 		Eigen::MatrixXd Vdi = Eigen::MatrixXd::Zero(6,n+1);   // acceleration
 
 		Vdi.block(3, 0, 3, 1) = - g;
-		AdTi[n] = mr::Adjoint(mr::TransInv(Mlist[n]));
+		AdTi[n] = MR::Adjoint(MR::TransInv(Mlist[n]));
 		Eigen::VectorXd Fi = Ftip;
 
 		Eigen::VectorXd taulist = Eigen::VectorXd::Zero(n);
@@ -515,10 +517,10 @@ namespace mr {
 		// forward pass
 		for (int i = 0; i < n; i++) {
 			Mi = Mi * Mlist[i];
-			Ai.col(i) = mr::Adjoint(mr::TransInv(Mi))*Slist.col(i);
+			Ai.col(i) = MR::Adjoint(MR::TransInv(Mi))*Slist.col(i);
 
-			AdTi[i] = mr::Adjoint(mr::MatrixExp6(mr::VecTose3(Ai.col(i)*-thetalist(i)))
-			          * mr::TransInv(Mlist[i]));
+			AdTi[i] = MR::Adjoint(MR::MatrixExp6(MR::VecTose3(Ai.col(i)*-thetalist(i)))
+			          * MR::TransInv(Mlist[i]));
 
 			Vi.col(i+1) = AdTi[i] * Vi.col(i) + Ai.col(i) * dthetalist(i);
 			Vdi.col(i+1) = AdTi[i] * Vdi.col(i) + Ai.col(i) * ddthetalist(i)
@@ -554,7 +556,7 @@ namespace mr {
 	    int n = thetalist.size();
 		Eigen::VectorXd dummylist = Eigen::VectorXd::Zero(n);
 		Eigen::VectorXd dummyForce = Eigen::VectorXd::Zero(6);
-		Eigen::VectorXd grav = mr::InverseDynamics(thetalist, dummylist, dummylist, g,
+		Eigen::VectorXd grav = MR::InverseDynamics(thetalist, dummylist, dummylist, g,
                                                 dummyForce, Mlist, Glist, Slist);
 		return grav;
 	}
@@ -586,7 +588,7 @@ namespace mr {
 		for (int i = 0; i < n; i++) {
 			Eigen::VectorXd ddthetalist = Eigen::VectorXd::Zero(n);
 			ddthetalist(i) = 1;
-			M.col(i) = mr::InverseDynamics(thetalist, dummylist, ddthetalist,
+			M.col(i) = MR::InverseDynamics(thetalist, dummylist, ddthetalist,
                              dummyg, dummyforce, Mlist, Glist, Slist);
 		}
 		return M;
@@ -614,7 +616,7 @@ namespace mr {
 		Eigen::VectorXd dummylist = Eigen::VectorXd::Zero(n);
 		Eigen::VectorXd dummyg = Eigen::VectorXd::Zero(3);
 		Eigen::VectorXd dummyforce = Eigen::VectorXd::Zero(6);
-		Eigen::VectorXd c = mr::InverseDynamics(thetalist, dthetalist, dummylist,
+		Eigen::VectorXd c = MR::InverseDynamics(thetalist, dthetalist, dummylist,
                              dummyg, dummyforce, Mlist, Glist, Slist);
 		return c;
 	}
@@ -641,7 +643,7 @@ namespace mr {
 		Eigen::VectorXd dummylist = Eigen::VectorXd::Zero(n);
 		Eigen::VectorXd dummyg = Eigen::VectorXd::Zero(3);
 
-		Eigen::VectorXd JTFtip = mr::InverseDynamics(thetalist, dummylist, dummylist,
+		Eigen::VectorXd JTFtip = MR::InverseDynamics(thetalist, dummylist, dummylist,
                              dummyg, Ftip, Mlist, Glist, Slist);
 		return JTFtip;
 	}
@@ -669,11 +671,11 @@ namespace mr {
 									const Eigen::VectorXd& g, const Eigen::VectorXd& Ftip, const std::vector<Eigen::MatrixXd>& Mlist,
 									const std::vector<Eigen::MatrixXd>& Glist, const Eigen::MatrixXd& Slist) {
 
-		Eigen::VectorXd totalForce = taulist - mr::VelQuadraticForces(thetalist, dthetalist, Mlist, Glist, Slist)
-                 							 - mr::GravityForces(thetalist, g, Mlist, Glist, Slist)
-                                             - mr::EndEffectorForces(thetalist, Ftip, Mlist, Glist, Slist);
+		Eigen::VectorXd totalForce = taulist - MR::VelQuadraticForces(thetalist, dthetalist, Mlist, Glist, Slist)
+                 							 - MR::GravityForces(thetalist, g, Mlist, Glist, Slist)
+                                             - MR::EndEffectorForces(thetalist, Ftip, Mlist, Glist, Slist);
 
-		Eigen::MatrixXd M = mr::MassMatrix(thetalist, Mlist, Glist, Slist);
+		Eigen::MatrixXd M = MR::MassMatrix(thetalist, Mlist, Glist, Slist);
 
 		// Use LDLT since M is positive definite
         Eigen::VectorXd ddthetalist = M.ldlt().solve(totalForce);
@@ -844,4 +846,7 @@ namespace mr {
 		ControlTauTraj_ret.push_back(thetamatT.transpose());
 		return ControlTauTraj_ret;
 	}
+
+#ifndef MR_SKIP_NAMESPACE
 }
+#endif
