@@ -60,7 +60,8 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 # create library
-add_library(ModernRoboticsCpp SHARED src/modern_robotics.cpp include/modern_robotics.h)
+# add_library(ModernRoboticsCpp SHARED src/modern_robotics.cpp)
+add_library(ModernRoboticsCpp src/modern_robotics.cpp)
 
 set(LIB_TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/lib_test.cpp
