@@ -10,7 +10,12 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_STANDARD 11)
+# Set build type if not set
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
+# Set cmake output binaries path
 # set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 # set(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/LIB)
 
@@ -19,6 +24,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 # Finding Eigen is somewhat complicated - TODO
 # we assume it is included in the include folder
+# tell cmake where to look for *.h files
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
 # Download and unpack googletest at configure time
